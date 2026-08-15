@@ -319,6 +319,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      ingest_leads: {
+        Args: { _dataset_id: string; _rows: Json }
+        Returns: {
+          duplicates: number
+          inserted: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin"
