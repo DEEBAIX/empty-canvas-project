@@ -10,33 +10,76 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicV1CountRouteImport } from './routes/api/public/v1/count'
+import { Route as ApiPublicV1CountriesRouteImport } from './routes/api/public/v1/countries'
+import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1CountRoute = ApiPublicV1CountRouteImport.update({
+  id: '/api/public/v1/count',
+  path: '/api/public/v1/count',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1CountriesRoute = ApiPublicV1CountriesRouteImport.update({
+  id: '/api/public/v1/countries',
+  path: '/api/public/v1/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1LeadsRoute = ApiPublicV1LeadsRouteImport.update({
+  id: '/api/public/v1/leads',
+  path: '/api/public/v1/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/v1/count': typeof ApiPublicV1CountRoute
+  '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/v1/count': typeof ApiPublicV1CountRoute
+  '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/v1/count': typeof ApiPublicV1CountRoute
+  '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
+  '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/public/v1/count'
+    | '/api/public/v1/countries'
+    | '/api/public/v1/leads'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/public/v1/count'
+    | '/api/public/v1/countries'
+    | '/api/public/v1/leads'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/v1/count'
+    | '/api/public/v1/countries'
+    | '/api/public/v1/leads'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicV1CountRoute: typeof ApiPublicV1CountRoute
+  ApiPublicV1CountriesRoute: typeof ApiPublicV1CountriesRoute
+  ApiPublicV1LeadsRoute: typeof ApiPublicV1LeadsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +91,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/count': {
+      id: '/api/public/v1/count'
+      path: '/api/public/v1/count'
+      fullPath: '/api/public/v1/count'
+      preLoaderRoute: typeof ApiPublicV1CountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/countries': {
+      id: '/api/public/v1/countries'
+      path: '/api/public/v1/countries'
+      fullPath: '/api/public/v1/countries'
+      preLoaderRoute: typeof ApiPublicV1CountriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/leads': {
+      id: '/api/public/v1/leads'
+      path: '/api/public/v1/leads'
+      fullPath: '/api/public/v1/leads'
+      preLoaderRoute: typeof ApiPublicV1LeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicV1CountRoute: ApiPublicV1CountRoute,
+  ApiPublicV1CountriesRoute: ApiPublicV1CountriesRoute,
+  ApiPublicV1LeadsRoute: ApiPublicV1LeadsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
