@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AuthenticatedDashboardImportRouteImport } from './routes/_authenticated/dashboard.import'
+import { Route as AuthenticatedDashboardLeadsRouteImport } from './routes/_authenticated/dashboard.leads'
 import { Route as ApiPublicV1CountRouteImport } from './routes/api/public/v1/count'
 import { Route as ApiPublicV1CountriesRouteImport } from './routes/api/public/v1/countries'
 import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
@@ -43,6 +45,18 @@ const AuthenticatedDashboardIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardImportRoute =
+  AuthenticatedDashboardImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardLeadsRoute =
+  AuthenticatedDashboardLeadsRouteImport.update({
+    id: '/leads',
+    path: '/leads',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const ApiPublicV1CountRoute = ApiPublicV1CountRouteImport.update({
   id: '/api/public/v1/count',
   path: '/api/public/v1/count',
@@ -63,6 +77,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -71,6 +87,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -82,6 +100,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/_authenticated/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -93,6 +113,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/dashboard/import'
+    | '/dashboard/leads'
     | '/dashboard/'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -101,6 +123,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/dashboard/import'
+    | '/dashboard/leads'
     | '/dashboard'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -111,6 +135,8 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/import'
+    | '/_authenticated/dashboard/leads'
     | '/_authenticated/dashboard/'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -163,6 +189,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/import': {
+      id: '/_authenticated/dashboard/import'
+      path: '/import'
+      fullPath: '/dashboard/import'
+      preLoaderRoute: typeof AuthenticatedDashboardImportRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/leads': {
+      id: '/_authenticated/dashboard/leads'
+      path: '/leads'
+      fullPath: '/dashboard/leads'
+      preLoaderRoute: typeof AuthenticatedDashboardLeadsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/api/public/v1/count': {
       id: '/api/public/v1/count'
       path: '/api/public/v1/count'
@@ -188,11 +228,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardImportRoute: typeof AuthenticatedDashboardImportRoute
+  AuthenticatedDashboardLeadsRoute: typeof AuthenticatedDashboardLeadsRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardImportRoute: AuthenticatedDashboardImportRoute,
+    AuthenticatedDashboardLeadsRoute: AuthenticatedDashboardLeadsRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
