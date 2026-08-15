@@ -14,8 +14,11 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AuthenticatedDashboardApiRouteImport } from './routes/_authenticated/dashboard.api'
 import { Route as AuthenticatedDashboardImportRouteImport } from './routes/_authenticated/dashboard.import'
+import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
 import { Route as AuthenticatedDashboardLeadsRouteImport } from './routes/_authenticated/dashboard.leads'
+import { Route as AuthenticatedDashboardLogsRouteImport } from './routes/_authenticated/dashboard.logs'
 import { Route as ApiPublicV1CountRouteImport } from './routes/api/public/v1/count'
 import { Route as ApiPublicV1CountriesRouteImport } from './routes/api/public/v1/countries'
 import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
@@ -45,16 +48,34 @@ const AuthenticatedDashboardIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardApiRoute =
+  AuthenticatedDashboardApiRouteImport.update({
+    id: '/api',
+    path: '/api',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardImportRoute =
   AuthenticatedDashboardImportRouteImport.update({
     id: '/import',
     path: '/import',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardKeysRoute =
+  AuthenticatedDashboardKeysRouteImport.update({
+    id: '/keys',
+    path: '/keys',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardLeadsRoute =
   AuthenticatedDashboardLeadsRouteImport.update({
     id: '/leads',
     path: '/leads',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardLogsRoute =
+  AuthenticatedDashboardLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const ApiPublicV1CountRoute = ApiPublicV1CountRouteImport.update({
@@ -77,8 +98,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/api': typeof AuthenticatedDashboardApiRoute
   '/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
+  '/dashboard/logs': typeof AuthenticatedDashboardLogsRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -87,8 +111,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard/api': typeof AuthenticatedDashboardApiRoute
   '/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
+  '/dashboard/logs': typeof AuthenticatedDashboardLogsRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -100,8 +127,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/api': typeof AuthenticatedDashboardApiRoute
   '/_authenticated/dashboard/import': typeof AuthenticatedDashboardImportRoute
+  '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/_authenticated/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
+  '/_authenticated/dashboard/logs': typeof AuthenticatedDashboardLogsRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
@@ -113,8 +143,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/dashboard/api'
     | '/dashboard/import'
+    | '/dashboard/keys'
     | '/dashboard/leads'
+    | '/dashboard/logs'
     | '/dashboard/'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -123,8 +156,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/dashboard/api'
     | '/dashboard/import'
+    | '/dashboard/keys'
     | '/dashboard/leads'
+    | '/dashboard/logs'
     | '/dashboard'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -135,8 +171,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/api'
     | '/_authenticated/dashboard/import'
+    | '/_authenticated/dashboard/keys'
     | '/_authenticated/dashboard/leads'
+    | '/_authenticated/dashboard/logs'
     | '/_authenticated/dashboard/'
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
@@ -189,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/api': {
+      id: '/_authenticated/dashboard/api'
+      path: '/api'
+      fullPath: '/dashboard/api'
+      preLoaderRoute: typeof AuthenticatedDashboardApiRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/import': {
       id: '/_authenticated/dashboard/import'
       path: '/import'
@@ -196,11 +242,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardImportRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/keys': {
+      id: '/_authenticated/dashboard/keys'
+      path: '/keys'
+      fullPath: '/dashboard/keys'
+      preLoaderRoute: typeof AuthenticatedDashboardKeysRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/leads': {
       id: '/_authenticated/dashboard/leads'
       path: '/leads'
       fullPath: '/dashboard/leads'
       preLoaderRoute: typeof AuthenticatedDashboardLeadsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/logs': {
+      id: '/_authenticated/dashboard/logs'
+      path: '/logs'
+      fullPath: '/dashboard/logs'
+      preLoaderRoute: typeof AuthenticatedDashboardLogsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/api/public/v1/count': {
@@ -228,15 +288,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardApiRoute: typeof AuthenticatedDashboardApiRoute
   AuthenticatedDashboardImportRoute: typeof AuthenticatedDashboardImportRoute
+  AuthenticatedDashboardKeysRoute: typeof AuthenticatedDashboardKeysRoute
   AuthenticatedDashboardLeadsRoute: typeof AuthenticatedDashboardLeadsRoute
+  AuthenticatedDashboardLogsRoute: typeof AuthenticatedDashboardLogsRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardApiRoute: AuthenticatedDashboardApiRoute,
     AuthenticatedDashboardImportRoute: AuthenticatedDashboardImportRoute,
+    AuthenticatedDashboardKeysRoute: AuthenticatedDashboardKeysRoute,
     AuthenticatedDashboardLeadsRoute: AuthenticatedDashboardLeadsRoute,
+    AuthenticatedDashboardLogsRoute: AuthenticatedDashboardLogsRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 

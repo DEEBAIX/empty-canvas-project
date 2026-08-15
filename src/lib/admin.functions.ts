@@ -115,7 +115,7 @@ export const ingestRows = createServerFn({ method: "POST" })
 
 export const finalizeDataset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { datasetId: string; status: string; error?: string | null }) => input)
+  .inputValidator((input: { datasetId: string; status: string; error?: string | null | undefined }) => input)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { error } = await context.supabase
@@ -153,7 +153,7 @@ export const deleteDataset = createServerFn({ method: "POST" })
 export const listLeads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: { country?: string; datasetId?: string; search?: string; page?: number }) => input,
+    (input: { country?: string | undefined; datasetId?: string | undefined; search?: string | undefined; page?: number | undefined }) => input,
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -197,9 +197,9 @@ export const createApiKey = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {
       name: string;
-      description?: string;
+      description?: string | undefined;
       rateLimit: number;
-      expiresAt?: string | null;
+      expiresAt?: string | null | undefined;
       countryCodes: string[];
       datasetIds: string[];
     }) => input,
@@ -260,7 +260,7 @@ export const deleteApiKey = createServerFn({ method: "POST" })
 
 export const listUsageLogs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { apiKeyId?: string }) => input)
+  .inputValidator((input: { apiKeyId?: string | undefined }) => input)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     let query = context.supabase

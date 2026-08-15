@@ -24,14 +24,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   ),
 });
 
-const nav = [
+const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/dashboard", label: "نظرة عامة", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/import", label: "رفع الملفات", icon: Upload },
   { to: "/dashboard/leads", label: "البيانات", icon: Users },
   { to: "/dashboard/keys", label: "مفاتيح API", icon: KeyRound },
   { to: "/dashboard/logs", label: "سجل الاستخدام", icon: Activity },
   { to: "/dashboard/api", label: "دليل الـ API", icon: BookOpen },
-] as const;
+];
 
 function DashboardLayout() {
   const navigate = useNavigate();

@@ -56,7 +56,10 @@ function KeysPage() {
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 
   const submit = async () => {
-    if (!name.trim()) return toast.error("أدخل اسم المنصة");
+    if (!name.trim()) {
+      toast.error("أدخل اسم المنصة");
+      return;
+    }
     setCreating(true);
     try {
       const res = await createFn({
