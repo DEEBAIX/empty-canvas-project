@@ -103,7 +103,7 @@ export const ingestRows = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { data: result, error } = await context.supabase.rpc("ingest_leads", {
       _dataset_id: data.datasetId,
-      _rows: data.rows,
+      _rows: data.rows as unknown as never,
     });
     if (error) throw new Error(error.message);
     const first = Array.isArray(result) ? result[0] : result;
