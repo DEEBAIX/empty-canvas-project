@@ -14,16 +14,314 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_key_scopes: {
+        Row: {
+          api_key_id: string
+          country_code: string | null
+          created_at: string
+          dataset_id: string | null
+          id: string
+        }
+        Insert: {
+          api_key_id: string
+          country_code?: string | null
+          created_at?: string
+          dataset_id?: string | null
+          id?: string
+        }
+        Update: {
+          api_key_id?: string
+          country_code?: string | null
+          created_at?: string
+          dataset_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_key_scopes_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_key_scopes_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "api_key_scopes_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          rate_limit_per_hour: number
+          request_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          rate_limit_per_hour?: number
+          request_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          rate_limit_per_hour?: number
+          request_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      api_usage_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          endpoint: string
+          id: number
+          ip_address: string | null
+          query_params: Json | null
+          response_ms: number | null
+          rows_returned: number
+          status_code: number
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint: string
+          id?: number
+          ip_address?: string | null
+          query_params?: Json | null
+          response_ms?: number | null
+          rows_returned?: number
+          status_code: number
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          endpoint?: string
+          id?: number
+          ip_address?: string | null
+          query_params?: Json | null
+          response_ms?: number | null
+          rows_returned?: number
+          status_code?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      datasets: {
+        Row: {
+          country_code: string
+          created_at: string
+          created_by: string | null
+          duplicate_rows: number
+          error_message: string | null
+          id: string
+          inserted_rows: number
+          name: string
+          source_filename: string | null
+          status: string
+          total_rows: number
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          created_by?: string | null
+          duplicate_rows?: number
+          error_message?: string | null
+          id?: string
+          inserted_rows?: number
+          name: string
+          source_filename?: string | null
+          status?: string
+          total_rows?: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          created_by?: string | null
+          duplicate_rows?: number
+          error_message?: string | null
+          id?: string
+          inserted_rows?: number
+          name?: string
+          source_filename?: string | null
+          status?: string
+          total_rows?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datasets_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          city: string | null
+          company: string | null
+          country_code: string
+          created_at: string
+          dataset_id: string
+          email: string | null
+          extra: Json
+          full_name: string | null
+          id: number
+          job_title: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          company?: string | null
+          country_code: string
+          created_at?: string
+          dataset_id: string
+          email?: string | null
+          extra?: Json
+          full_name?: string | null
+          id?: number
+          job_title?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          company?: string | null
+          country_code?: string
+          created_at?: string
+          dataset_id?: string
+          email?: string | null
+          extra?: Json
+          full_name?: string | null
+          id?: number
+          job_title?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "leads_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +448,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
