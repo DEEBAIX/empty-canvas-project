@@ -115,12 +115,17 @@ function ImportPage() {
     }
     try {
       const preview = await previewFile(f);
+      setHeaderless(Boolean(preview.headerless));
       setMapping(buildMapping(preview.headers, columnDefs as ColumnDefinition[]));
       setSample(preview.rows);
+      if (preview.headerless) {
+        toast.info("الملف بدون سطر عناوين — تم تطبيق ترتيب أعمدة القالب، يمكنك تعديله بالأسفل.");
+      }
     } catch {
       toast.error("تعذر قراءة الملف");
     }
   };
+
 
   const start = async () => {
     if (!file || !country || !name) {
