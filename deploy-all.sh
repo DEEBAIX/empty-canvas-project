@@ -131,6 +131,9 @@ fi
 say "تشغيل التطبيق عبر PM2 ($ENTRY)"
 pm2 delete "$APP_NAME" >/dev/null 2>&1 || true
 cd "$APP_DIR"
+set -a
+source "$APP_DIR/.env"
+set +a
 PORT="$PORT" NODE_ENV=production pm2 start "$ENTRY" --name "$APP_NAME" --update-env
 pm2 save
 pm2 startup systemd -u root --hp /root | tail -1 | bash || true
@@ -176,6 +179,9 @@ git fetch --all
 git reset --hard origin/${BRANCH}
 npm install
 npm run build
+set -a
+source ${APP_DIR}/.env
+set +a
 pm2 restart ${APP_NAME} --update-env
 pm2 save
 echo "redeploy done: \$(git rev-parse --short HEAD)"
@@ -245,5 +251,8 @@ GitHub → Settings → Webhooks → Add webhook
   scp datahub.dump root@72.61.160.68:/root/
 على الخادم:
   pg_restore --no-owner --no-privileges -d "${DATABASE_URL}" /root/datahub.dump
+
+تشخيص خطأ 500:
+  pm2 logs ${APP_NAME} --lines 100
 ======================================
 EOF
