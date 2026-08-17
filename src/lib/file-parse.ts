@@ -81,17 +81,21 @@ export async function previewFile(file: File): Promise<FilePreview> {
     return objectsToPreview(list);
   }
 
-  const firstLine = text.split(/\r?\n/)[0] ?? "";
+  const firstLine = text.split(/\r\n|\r|\n/)[0] ?? "";
   const delim = detectDelimiter(firstLine);
-  const { rows } = parseChunk(text.split(/\r?\n/).slice(0, 6).join("\n") + "\n", delim);
-  const headers = (rows[0] ?? []).map((h) => h.replace(/^\uFEFF/, "").trim());
-  const preview = rows.slice(1, 6).map((cells) => {
+  const { rows } = parseChunk(text.split(/\r\n|\r|\n/).slice(0, 7).join("\n") + "\n", delim);
+  const firstRow = (rows[0] ?? []).map((h) => h.replace(/^\uFEFF/, "").trim());
+  const headerless = looksLikeDataRow(firstRow);
+  const headers = headerless ? headerlessColumns(firstRow.length) : firstRow;
+  const dataRows = headerless ? rows.slice(0, 5) : rows.slice(1, 6);
+  const preview = dataRows.map((cells) => {
     const r: CsvRow = {};
     headers.forEach((h, i) => (r[h] = (cells[i] ?? "").trim()));
     return r;
   });
-  return { headers: headers.filter(Boolean), rows: preview };
+  return { headers: headers.filter(Boolean), rows: preview, headerless };
 }
+
 
 export interface StreamOptions {
   batchSize?: number;
