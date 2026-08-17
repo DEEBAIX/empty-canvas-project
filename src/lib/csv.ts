@@ -72,6 +72,8 @@ export function detectDelimiter(headerLine: string): string {
 export interface CsvStreamOptions {
   batchSize?: number;
   delimiter?: string;
+  /** When set, the file is treated as headerless and these names are used positionally. */
+  headers?: string[];
   onHeaders?: (headers: string[]) => void;
   onBatch: (rows: CsvRow[], bytesRead: number) => Promise<void>;
 }
@@ -81,6 +83,7 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
   const batchSize = opts.batchSize ?? 5000;
   const decoder = new TextDecoder("utf-8");
   const reader = file.stream().getReader();
+
 
   let carry = "";
   let delimiter = opts.delimiter ?? "";
