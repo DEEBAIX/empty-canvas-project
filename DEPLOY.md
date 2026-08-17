@@ -115,6 +115,9 @@ npm install
 npm run build
 
 pm2 delete datahub 2>/dev/null || true
+set -a
+source .env
+set +a
 PORT=$PORT pm2 start ".output/server/index.mjs" --name datahub --update-env
 pm2 save
 pm2 startup systemd -u root --hp /root | tail -1 | bash || true
@@ -169,6 +172,9 @@ git fetch --all
 git reset --hard origin/main
 npm install
 npm run build
+set -a
+source .env
+set +a
 pm2 restart datahub --update-env
 pm2 save
 echo "✅ redeploy done: $(git rev-parse --short HEAD)"
