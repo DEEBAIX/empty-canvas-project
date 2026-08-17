@@ -78,6 +78,8 @@ function ImportPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [mapping, setMapping] = useState<MappedColumn[]>([]);
+  const [headerless, setHeaderless] = useState(false);
+
   const [sample, setSample] = useState<Record<string, string>[]>([]);
   const [country, setCountry] = useState("");
   const [countryQuery, setCountryQuery] = useState("");
