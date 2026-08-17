@@ -2,6 +2,8 @@ import * as XLSX from "xlsx";
 import { detectDelimiter, normalizePhone, parseChunk, streamCsvFile, type CsvRow } from "@/lib/csv";
 import { isCoreField } from "@/lib/lead-filters";
 import type { MappedColumn } from "@/lib/columns";
+import { headerlessColumns, looksLikeDataRow } from "@/lib/template-layout";
+
 
 export type FileKind = "delimited" | "xlsx" | "json" | "jsonl";
 
