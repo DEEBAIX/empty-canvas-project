@@ -2,6 +2,8 @@ import * as XLSX from "xlsx";
 import { detectDelimiter, normalizePhone, parseChunk, streamCsvFile, type CsvRow } from "@/lib/csv";
 import { isCoreField } from "@/lib/lead-filters";
 import type { MappedColumn } from "@/lib/columns";
+import { headerlessColumns, looksLikeDataRow } from "@/lib/template-layout";
+
 
 export type FileKind = "delimited" | "xlsx" | "json" | "jsonl";
 
@@ -19,7 +21,10 @@ export function fileKind(name: string): FileKind {
 export interface FilePreview {
   headers: string[];
   rows: CsvRow[];
+  /** True when the file had no header row and positional template names were used. */
+  headerless?: boolean;
 }
+
 
 function objectsToPreview(list: Record<string, unknown>[]): FilePreview {
   const headers: string[] = [];
@@ -78,20 +83,26 @@ export async function previewFile(file: File): Promise<FilePreview> {
     return objectsToPreview(list);
   }
 
-  const firstLine = text.split(/\r?\n/)[0] ?? "";
+  const firstLine = text.split(/\r\n|\r|\n/)[0] ?? "";
   const delim = detectDelimiter(firstLine);
-  const { rows } = parseChunk(text.split(/\r?\n/).slice(0, 6).join("\n") + "\n", delim);
-  const headers = (rows[0] ?? []).map((h) => h.replace(/^\uFEFF/, "").trim());
-  const preview = rows.slice(1, 6).map((cells) => {
+  const { rows } = parseChunk(text.split(/\r\n|\r|\n/).slice(0, 7).join("\n") + "\n", delim);
+  const firstRow = (rows[0] ?? []).map((h) => h.replace(/^\uFEFF/, "").trim());
+  const headerless = looksLikeDataRow(firstRow);
+  const headers = headerless ? headerlessColumns(firstRow.length) : firstRow;
+  const dataRows = headerless ? rows.slice(0, 5) : rows.slice(1, 6);
+  const preview = dataRows.map((cells) => {
     const r: CsvRow = {};
     headers.forEach((h, i) => (r[h] = (cells[i] ?? "").trim()));
     return r;
   });
-  return { headers: headers.filter(Boolean), rows: preview };
+  return { headers: headers.filter(Boolean), rows: preview, headerless };
 }
+
 
 export interface StreamOptions {
   batchSize?: number;
+  /** Positional column names for headerless delimited files. */
+  headers?: string[];
   onBatch: (rows: CsvRow[], bytesRead: number) => Promise<void>;
 }
 
@@ -101,7 +112,13 @@ export async function streamFileRows(file: File, opts: StreamOptions): Promise<n
   const batchSize = opts.batchSize ?? 5000;
 
   if (kind === "delimited") {
-    return streamCsvFile(file, { batchSize, onBatch: opts.onBatch });
+    return streamCsvFile(file, {
+      batchSize,
+      ...(opts.headers ? { headers: opts.headers } : {}),
+      onBatch: opts.onBatch,
+    });
+
+
   }
 
   if (kind === "jsonl") {

@@ -78,6 +78,8 @@ function ImportPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [mapping, setMapping] = useState<MappedColumn[]>([]);
+  const [headerless, setHeaderless] = useState(false);
+
   const [sample, setSample] = useState<Record<string, string>[]>([]);
   const [country, setCountry] = useState("");
   const [countryQuery, setCountryQuery] = useState("");
@@ -115,12 +117,17 @@ function ImportPage() {
     }
     try {
       const preview = await previewFile(f);
+      setHeaderless(Boolean(preview.headerless));
       setMapping(buildMapping(preview.headers, columnDefs as ColumnDefinition[]));
       setSample(preview.rows);
+      if (preview.headerless) {
+        toast.info("الملف بدون سطر عناوين — تم تطبيق ترتيب أعمدة القالب، يمكنك تعديله بالأسفل.");
+      }
     } catch {
       toast.error("تعذر قراءة الملف");
     }
   };
+
 
   const start = async () => {
     if (!file || !country || !name) {
@@ -164,6 +171,8 @@ function ImportPage() {
 
       await streamFileRows(file, {
         batchSize: BATCH,
+        ...(headerless ? { headers: mapping.map((m) => m.header) } : {}),
+
         onBatch: async (rows, bytesRead) => {
           const payload = rows
             .map((r) => buildLeadRecord(r, mapping, dialCode))
@@ -277,6 +286,12 @@ function ImportPage() {
                 الأعمدة الجديدة تُنشأ تلقائياً وتُحفظ في قاموس الأعمدة
               </span>
             </div>
+            {headerless && (
+              <p className="rounded-lg border border-border bg-muted/40 p-2 text-xs text-muted-foreground">
+                الملف بدون سطر عناوين — تم استخدام ترتيب أعمدة القالب (28 عموداً) وأول صف يُعتبر بيانات.
+              </p>
+            )}
+
             <div className="max-h-80 overflow-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted/60 text-xs">

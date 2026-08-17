@@ -37,19 +37,16 @@ export function parseChunk(text: string, delimiter: string): { rows: string[][];
       i++;
       continue;
     }
-    if (ch === "\r") {
-      i++;
-      continue;
-    }
-    if (ch === "\n") {
+    if (ch === "\r" || ch === "\n") {
       row.push(field);
       rows.push(row);
       row = [];
       field = "";
-      i++;
+      i += ch === "\r" && text[i + 1] === "\n" ? 2 : 1;
       lastComplete = i;
       continue;
     }
+
     field += ch;
     i++;
   }
@@ -75,6 +72,8 @@ export function detectDelimiter(headerLine: string): string {
 export interface CsvStreamOptions {
   batchSize?: number;
   delimiter?: string;
+  /** When set, the file is treated as headerless and these names are used positionally. */
+  headers?: string[];
   onHeaders?: (headers: string[]) => void;
   onBatch: (rows: CsvRow[], bytesRead: number) => Promise<void>;
 }
@@ -85,9 +84,10 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
   const decoder = new TextDecoder("utf-8");
   const reader = file.stream().getReader();
 
+
   let carry = "";
   let delimiter = opts.delimiter ?? "";
-  let headers: string[] | null = null;
+  let headers: string[] | null = opts.headers ?? null;
   let batch: CsvRow[] = [];
   let total = 0;
   let bytesRead = 0;
@@ -120,9 +120,10 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
     bytesRead += value.byteLength;
     carry += decoder.decode(value, { stream: true });
     if (!delimiter) {
-      const nl = carry.indexOf("\n");
+      const nl = carry.search(/[\r\n]/);
       if (nl === -1 && carry.length < 1_000_000) continue;
       delimiter = detectDelimiter(carry.slice(0, nl === -1 ? carry.length : nl));
+
     }
     const { rows, rest } = parseChunk(carry, delimiter);
     carry = rest;
