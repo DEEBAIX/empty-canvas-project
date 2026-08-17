@@ -101,6 +101,8 @@ export async function previewFile(file: File): Promise<FilePreview> {
 
 export interface StreamOptions {
   batchSize?: number;
+  /** Positional column names for headerless delimited files. */
+  headers?: string[];
   onBatch: (rows: CsvRow[], bytesRead: number) => Promise<void>;
 }
 
@@ -110,7 +112,8 @@ export async function streamFileRows(file: File, opts: StreamOptions): Promise<n
   const batchSize = opts.batchSize ?? 5000;
 
   if (kind === "delimited") {
-    return streamCsvFile(file, { batchSize, onBatch: opts.onBatch });
+    return streamCsvFile(file, { batchSize, headers: opts.headers, onBatch: opts.onBatch });
+
   }
 
   if (kind === "jsonl") {
