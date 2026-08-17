@@ -87,7 +87,7 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
 
   let carry = "";
   let delimiter = opts.delimiter ?? "";
-  let headers: string[] | null = null;
+  let headers: string[] | null = opts.headers ?? null;
   let batch: CsvRow[] = [];
   let total = 0;
   let bytesRead = 0;
@@ -120,9 +120,10 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
     bytesRead += value.byteLength;
     carry += decoder.decode(value, { stream: true });
     if (!delimiter) {
-      const nl = carry.indexOf("\n");
+      const nl = carry.search(/[\r\n]/);
       if (nl === -1 && carry.length < 1_000_000) continue;
       delimiter = detectDelimiter(carry.slice(0, nl === -1 ? carry.length : nl));
+
     }
     const { rows, rest } = parseChunk(carry, delimiter);
     carry = rest;
