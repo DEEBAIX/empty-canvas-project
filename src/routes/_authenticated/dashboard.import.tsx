@@ -286,6 +286,12 @@ function ImportPage() {
                 الأعمدة الجديدة تُنشأ تلقائياً وتُحفظ في قاموس الأعمدة
               </span>
             </div>
+            {headerless && (
+              <p className="rounded-lg border border-border bg-muted/40 p-2 text-xs text-muted-foreground">
+                الملف بدون سطر عناوين — تم استخدام ترتيب أعمدة القالب (28 عموداً) وأول صف يُعتبر بيانات.
+              </p>
+            )}
+
             <div className="max-h-80 overflow-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted/60 text-xs">
