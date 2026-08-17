@@ -37,19 +37,16 @@ export function parseChunk(text: string, delimiter: string): { rows: string[][];
       i++;
       continue;
     }
-    if (ch === "\r") {
-      i++;
-      continue;
-    }
-    if (ch === "\n") {
+    if (ch === "\r" || ch === "\n") {
       row.push(field);
       rows.push(row);
       row = [];
       field = "";
-      i++;
+      i += ch === "\r" && text[i + 1] === "\n" ? 2 : 1;
       lastComplete = i;
       continue;
     }
+
     field += ch;
     i++;
   }
