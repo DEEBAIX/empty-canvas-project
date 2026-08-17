@@ -171,6 +171,8 @@ function ImportPage() {
 
       await streamFileRows(file, {
         batchSize: BATCH,
+        ...(headerless ? { headers: mapping.map((m) => m.header) } : {}),
+
         onBatch: async (rows, bytesRead) => {
           const payload = rows
             .map((r) => buildLeadRecord(r, mapping, dialCode))
