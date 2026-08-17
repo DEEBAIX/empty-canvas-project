@@ -112,7 +112,12 @@ export async function streamFileRows(file: File, opts: StreamOptions): Promise<n
   const batchSize = opts.batchSize ?? 5000;
 
   if (kind === "delimited") {
-    return streamCsvFile(file, { batchSize, headers: opts.headers, onBatch: opts.onBatch });
+    return streamCsvFile(file, {
+      batchSize,
+      ...(opts.headers ? { headers: opts.headers } : {}),
+      onBatch: opts.onBatch,
+    });
+
 
   }
 
