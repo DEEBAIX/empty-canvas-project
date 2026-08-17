@@ -74,6 +74,8 @@ export type Database = {
           name: string
           rate_limit_per_hour: number
           request_count: number
+          saved_view_id: string | null
+          scope_mode: string
           updated_at: string
         }
         Insert: {
@@ -89,6 +91,8 @@ export type Database = {
           name: string
           rate_limit_per_hour?: number
           request_count?: number
+          saved_view_id?: string | null
+          scope_mode?: string
           updated_at?: string
         }
         Update: {
@@ -104,9 +108,19 @@ export type Database = {
           name?: string
           rate_limit_per_hour?: number
           request_count?: number
+          saved_view_id?: string | null
+          scope_mode?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_saved_view_id_fkey"
+            columns: ["saved_view_id"]
+            isOneToOne: false
+            referencedRelation: "saved_views"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       api_usage_logs: {
         Row: {
@@ -152,23 +166,103 @@ export type Database = {
           },
         ]
       }
+      column_definitions: {
+        Row: {
+          created_at: string
+          data_type: string
+          field_key: string
+          id: string
+          is_core: boolean
+          label: string
+          label_ar: string | null
+          synonyms: string[]
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          data_type?: string
+          field_key: string
+          id?: string
+          is_core?: boolean
+          label: string
+          label_ar?: string | null
+          synonyms?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          field_key?: string
+          id?: string
+          is_core?: boolean
+          label?: string
+          label_ar?: string | null
+          synonyms?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           code: string
           created_at: string
+          dial_code: string | null
           name: string
+          name_ar: string | null
         }
         Insert: {
           code: string
           created_at?: string
+          dial_code?: string | null
           name: string
+          name_ar?: string | null
         }
         Update: {
           code?: string
           created_at?: string
+          dial_code?: string | null
           name?: string
+          name_ar?: string | null
         }
         Relationships: []
+      }
+      dataset_columns: {
+        Row: {
+          created_at: string
+          dataset_id: string
+          field_key: string
+          id: string
+          position: number
+          source_header: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id: string
+          field_key: string
+          id?: string
+          position?: number
+          source_header: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string
+          field_key?: string
+          id?: string
+          position?: number
+          source_header?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataset_columns_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "datasets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       datasets: {
         Row: {
@@ -279,6 +373,57 @@ export type Database = {
           },
           {
             foreignKeyName: "leads_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "datasets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_views: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          dataset_id: string | null
+          fields: string[]
+          filters: Json
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          dataset_id?: string | null
+          fields?: string[]
+          filters?: Json
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          dataset_id?: string | null
+          fields?: string[]
+          filters?: Json
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_views_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "saved_views_dataset_id_fkey"
             columns: ["dataset_id"]
             isOneToOne: false
             referencedRelation: "datasets"

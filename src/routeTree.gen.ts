@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardApiRouteImport } from './routes/_authenticated/dashboard.api'
+import { Route as AuthenticatedDashboardFilterRouteImport } from './routes/_authenticated/dashboard.filter'
 import { Route as AuthenticatedDashboardImportRouteImport } from './routes/_authenticated/dashboard.import'
 import { Route as AuthenticatedDashboardKeysRouteImport } from './routes/_authenticated/dashboard.keys'
 import { Route as AuthenticatedDashboardLeadsRouteImport } from './routes/_authenticated/dashboard.leads'
@@ -22,6 +23,7 @@ import { Route as AuthenticatedDashboardLogsRouteImport } from './routes/_authen
 import { Route as ApiPublicV1CountRouteImport } from './routes/api/public/v1/count'
 import { Route as ApiPublicV1CountriesRouteImport } from './routes/api/public/v1/countries'
 import { Route as ApiPublicV1LeadsRouteImport } from './routes/api/public/v1/leads'
+import { Route as ApiPublicV1SchemaRouteImport } from './routes/api/public/v1/schema'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +54,12 @@ const AuthenticatedDashboardApiRoute =
   AuthenticatedDashboardApiRouteImport.update({
     id: '/api',
     path: '/api',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardFilterRoute =
+  AuthenticatedDashboardFilterRouteImport.update({
+    id: '/filter',
+    path: '/filter',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardImportRoute =
@@ -93,12 +101,18 @@ const ApiPublicV1LeadsRoute = ApiPublicV1LeadsRouteImport.update({
   path: '/api/public/v1/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1SchemaRoute = ApiPublicV1SchemaRouteImport.update({
+  id: '/api/public/v1/schema',
+  path: '/api/public/v1/schema',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/api': typeof AuthenticatedDashboardApiRoute
+  '/dashboard/filter': typeof AuthenticatedDashboardFilterRoute
   '/dashboard/import': typeof AuthenticatedDashboardImportRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
@@ -107,11 +121,13 @@ export interface FileRoutesByFullPath {
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
   '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
+  '/api/public/v1/schema': typeof ApiPublicV1SchemaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard/api': typeof AuthenticatedDashboardApiRoute
+  '/dashboard/filter': typeof AuthenticatedDashboardFilterRoute
   '/dashboard/import': typeof AuthenticatedDashboardImportRoute
   '/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
@@ -120,6 +136,7 @@ export interface FileRoutesByTo {
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
   '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
+  '/api/public/v1/schema': typeof ApiPublicV1SchemaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,6 +145,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/dashboard/api': typeof AuthenticatedDashboardApiRoute
+  '/_authenticated/dashboard/filter': typeof AuthenticatedDashboardFilterRoute
   '/_authenticated/dashboard/import': typeof AuthenticatedDashboardImportRoute
   '/_authenticated/dashboard/keys': typeof AuthenticatedDashboardKeysRoute
   '/_authenticated/dashboard/leads': typeof AuthenticatedDashboardLeadsRoute
@@ -136,6 +154,7 @@ export interface FileRoutesById {
   '/api/public/v1/count': typeof ApiPublicV1CountRoute
   '/api/public/v1/countries': typeof ApiPublicV1CountriesRoute
   '/api/public/v1/leads': typeof ApiPublicV1LeadsRoute
+  '/api/public/v1/schema': typeof ApiPublicV1SchemaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,6 +163,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/dashboard/api'
+    | '/dashboard/filter'
     | '/dashboard/import'
     | '/dashboard/keys'
     | '/dashboard/leads'
@@ -152,11 +172,13 @@ export interface FileRouteTypes {
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
     | '/api/public/v1/leads'
+    | '/api/public/v1/schema'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/dashboard/api'
+    | '/dashboard/filter'
     | '/dashboard/import'
     | '/dashboard/keys'
     | '/dashboard/leads'
@@ -165,6 +187,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
     | '/api/public/v1/leads'
+    | '/api/public/v1/schema'
   id:
     | '__root__'
     | '/'
@@ -172,6 +195,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/dashboard/api'
+    | '/_authenticated/dashboard/filter'
     | '/_authenticated/dashboard/import'
     | '/_authenticated/dashboard/keys'
     | '/_authenticated/dashboard/leads'
@@ -180,6 +204,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/count'
     | '/api/public/v1/countries'
     | '/api/public/v1/leads'
+    | '/api/public/v1/schema'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,6 +214,7 @@ export interface RootRouteChildren {
   ApiPublicV1CountRoute: typeof ApiPublicV1CountRoute
   ApiPublicV1CountriesRoute: typeof ApiPublicV1CountriesRoute
   ApiPublicV1LeadsRoute: typeof ApiPublicV1LeadsRoute
+  ApiPublicV1SchemaRoute: typeof ApiPublicV1SchemaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -233,6 +259,13 @@ declare module '@tanstack/react-router' {
       path: '/api'
       fullPath: '/dashboard/api'
       preLoaderRoute: typeof AuthenticatedDashboardApiRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/filter': {
+      id: '/_authenticated/dashboard/filter'
+      path: '/filter'
+      fullPath: '/dashboard/filter'
+      preLoaderRoute: typeof AuthenticatedDashboardFilterRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/import': {
@@ -284,11 +317,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1LeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/schema': {
+      id: '/api/public/v1/schema'
+      path: '/api/public/v1/schema'
+      fullPath: '/api/public/v1/schema'
+      preLoaderRoute: typeof ApiPublicV1SchemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardApiRoute: typeof AuthenticatedDashboardApiRoute
+  AuthenticatedDashboardFilterRoute: typeof AuthenticatedDashboardFilterRoute
   AuthenticatedDashboardImportRoute: typeof AuthenticatedDashboardImportRoute
   AuthenticatedDashboardKeysRoute: typeof AuthenticatedDashboardKeysRoute
   AuthenticatedDashboardLeadsRoute: typeof AuthenticatedDashboardLeadsRoute
@@ -299,6 +340,7 @@ interface AuthenticatedDashboardRouteChildren {
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardApiRoute: AuthenticatedDashboardApiRoute,
+    AuthenticatedDashboardFilterRoute: AuthenticatedDashboardFilterRoute,
     AuthenticatedDashboardImportRoute: AuthenticatedDashboardImportRoute,
     AuthenticatedDashboardKeysRoute: AuthenticatedDashboardKeysRoute,
     AuthenticatedDashboardLeadsRoute: AuthenticatedDashboardLeadsRoute,
@@ -329,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicV1CountRoute: ApiPublicV1CountRoute,
   ApiPublicV1CountriesRoute: ApiPublicV1CountriesRoute,
   ApiPublicV1LeadsRoute: ApiPublicV1LeadsRoute,
+  ApiPublicV1SchemaRoute: ApiPublicV1SchemaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
