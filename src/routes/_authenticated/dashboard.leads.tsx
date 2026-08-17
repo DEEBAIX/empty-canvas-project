@@ -60,9 +60,15 @@ function LeadsPage() {
       <div>
         <h1 className="text-2xl font-extrabold">البيانات</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {data ? `${nf.format(data.count)} صف مطابق` : "جارٍ التحميل..."}
+          {data ? `${nf.format(data.count)} صف مطابق` : "جارٍ التحميل..."} — عرض سريع للحقول
+          الأساسية.{" "}
+          <Link to="/dashboard/filter" className="font-semibold text-primary underline">
+            افتح «فلترة البيانات»
+          </Link>{" "}
+          لعرض كل أعمدة الملف والفلترة المتقدمة والتصدير.
         </p>
       </div>
+
 
       <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-4">
         <Select
