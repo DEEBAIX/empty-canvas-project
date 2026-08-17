@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Database,
+  Filter,
+
   LayoutDashboard,
   Upload,
   Users,
@@ -28,6 +30,8 @@ const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: bo
   { to: "/dashboard", label: "نظرة عامة", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/import", label: "رفع الملفات", icon: Upload },
   { to: "/dashboard/leads", label: "البيانات", icon: Users },
+  { to: "/dashboard/filter", label: "فلترة البيانات", icon: Filter },
+
   { to: "/dashboard/keys", label: "مفاتيح API", icon: KeyRound },
   { to: "/dashboard/logs", label: "سجل الاستخدام", icon: Activity },
   { to: "/dashboard/api", label: "دليل الـ API", icon: BookOpen },

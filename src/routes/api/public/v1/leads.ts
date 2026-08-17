@@ -1,9 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateKey, getAdmin, jsonResponse, logUsage } from "@/lib/api-auth";
+import {
+  applyLeadFilters,
+  isCoreField,
+  parseFiltersFromParams,
+  type LeadFilter,
+} from "@/lib/lead-filters";
+
+const ENDPOINT = "/api/public/v1/leads";
 
 export const Route = createFileRoute("/api/public/v1/leads")({
   server: {
     handlers: {
+      OPTIONS: async () => new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization,x-api-key,content-type" } }),
       GET: async ({ request }) => {
         const started = Date.now();
         const url = new URL(request.url);
@@ -13,7 +22,7 @@ export const Route = createFileRoute("/api/public/v1/leads")({
         if (!auth.ok) {
           await logUsage({
             apiKeyId: null,
-            endpoint: "/api/public/v1/leads",
+            endpoint: ENDPOINT,
             query: params,
             status: auth.status,
             rows: 0,
@@ -27,9 +36,13 @@ export const Route = createFileRoute("/api/public/v1/leads")({
         const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 100), 1), 1000);
         const cursor = Number(url.searchParams.get("cursor") ?? 0);
         const country = url.searchParams.get("country")?.toUpperCase();
-        const dataset = url.searchParams.get("dataset");
+        const dataset = url.searchParams.get("dataset") ?? key.view?.datasetId ?? null;
         const updatedSince = url.searchParams.get("updated_since");
         const search = url.searchParams.get("search");
+        const requestedFields = (url.searchParams.get("fields") ?? "")
+          .split(",")
+          .map((f) => f.trim())
+          .filter(Boolean);
 
         if (country && key.countries.length && !key.countries.includes(country)) {
           return jsonResponse({ error: `Key not allowed for country ${country}` }, 403);
@@ -38,10 +51,17 @@ export const Route = createFileRoute("/api/public/v1/leads")({
           return jsonResponse({ error: "Key not allowed for this dataset" }, 403);
         }
 
+        const filters: LeadFilter[] = [
+          ...((key.view?.filters as LeadFilter[] | undefined) ?? []),
+          ...parseFiltersFromParams(url.searchParams),
+        ];
+
         const admin = await getAdmin();
         let query = admin
           .from("leads")
-          .select("id,country_code,dataset_id,full_name,phone,email,city,company,job_title,website,extra,updated_at")
+          .select(
+            "id,country_code,dataset_id,full_name,phone,email,city,company,job_title,website,extra,updated_at",
+          )
           .order("id", { ascending: true })
           .limit(limit);
 
@@ -49,19 +69,24 @@ export const Route = createFileRoute("/api/public/v1/leads")({
         if (country) query = query.eq("country_code", country);
         else if (key.countries.length) query = query.in("country_code", key.countries);
         if (dataset) query = query.eq("dataset_id", dataset);
-        else if (key.datasets.length && !key.countries.length)
+        else if (key.datasets.length && (key.scopeMode === "all" || !key.countries.length))
           query = query.in("dataset_id", key.datasets);
+        if (key.view?.country && !country) query = query.eq("country_code", key.view.country);
         if (updatedSince) query = query.gte("updated_at", updatedSince);
         if (search) {
-          const s = search.replace(/[%,]/g, "");
-          query = query.or(`full_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%,company.ilike.%${s}%`);
+          const s = search.replace(/[%,()]/g, " ").trim();
+          if (s)
+            query = query.or(
+              `full_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%,company.ilike.%${s}%`,
+            );
         }
+        query = applyLeadFilters(query as never, filters) as typeof query;
 
         const { data, error } = await query;
         if (error) {
           await logUsage({
             apiKeyId: key.id,
-            endpoint: "/api/public/v1/leads",
+            endpoint: ENDPOINT,
             query: params,
             status: 500,
             rows: 0,
@@ -71,12 +96,33 @@ export const Route = createFileRoute("/api/public/v1/leads")({
           return jsonResponse({ error: "Query failed" }, 500);
         }
 
-        const rows = data ?? [];
-        const nextCursor = rows.length === limit ? rows[rows.length - 1]!.id : null;
+        const raw = data ?? [];
+        const nextCursor = raw.length === limit ? raw[raw.length - 1]!.id : null;
+
+        const projection = requestedFields.length
+          ? requestedFields
+          : (key.view?.fields?.length ? key.view.fields : null);
+
+        const rows = projection
+          ? raw.map((r) => {
+              const rec = r as Record<string, unknown>;
+              const extra = (rec["extra"] ?? {}) as Record<string, unknown>;
+              const out: Record<string, unknown> = { id: rec["id"] };
+              for (const f of projection) {
+                out[f] = isCoreField(f) ? (rec[f] ?? null) : (extra[f] ?? null);
+              }
+              return out;
+            })
+          : raw.map((r) => {
+              const rec = r as Record<string, unknown>;
+              const extra = (rec["extra"] ?? {}) as Record<string, unknown>;
+              const { extra: _drop, ...core } = rec;
+              return { ...core, ...extra };
+            });
 
         await logUsage({
           apiKeyId: key.id,
-          endpoint: "/api/public/v1/leads",
+          endpoint: ENDPOINT,
           query: params,
           status: 200,
           rows: rows.length,

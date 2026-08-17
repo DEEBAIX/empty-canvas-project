@@ -6,6 +6,9 @@ export interface KeyContext {
   rateLimit: number;
   countries: string[];
   datasets: string[];
+  /** "any" (default): country OR dataset scope grants access. "all": both must match. */
+  scopeMode: "any" | "all";
+  view: { filters: unknown; fields: string[]; datasetId: string | null; country: string | null } | null;
 }
 
 export function jsonResponse(body: unknown, status = 200) {
@@ -42,7 +45,7 @@ export async function authenticateKey(
   const admin = await getAdmin();
   const { data, error } = await admin
     .from("api_keys")
-    .select("id,name,is_active,expires_at,rate_limit_per_hour,api_key_scopes(country_code,dataset_id)")
+    .select("id,name,is_active,expires_at,rate_limit_per_hour,scope_mode,saved_view_id,api_key_scopes(country_code,dataset_id)")
     .eq("key_hash", hash)
     .maybeSingle();
 
@@ -67,6 +70,22 @@ export async function authenticateKey(
     return { ok: false, status: 429, error: "Rate limit exceeded" };
   }
 
+  let view: KeyContext["view"] = null;
+  if (data.saved_view_id) {
+    const { data: v } = await admin
+      .from("saved_views")
+      .select("filters,fields,dataset_id,country_code")
+      .eq("id", data.saved_view_id as string)
+      .maybeSingle();
+    if (v)
+      view = {
+        filters: v.filters,
+        fields: v.fields ?? [],
+        datasetId: v.dataset_id,
+        country: v.country_code,
+      };
+  }
+
   return {
     ok: true,
     key: {
@@ -75,6 +94,8 @@ export async function authenticateKey(
       rateLimit: Number(data.rate_limit_per_hour),
       countries,
       datasets,
+      scopeMode: (data.scope_mode as "any" | "all") ?? "any",
+      view,
     },
   };
 }

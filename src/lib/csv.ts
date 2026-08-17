@@ -1,7 +1,7 @@
 export type CsvRow = Record<string, string>;
 
-/** Parses a CSV text chunk, returning complete rows plus the trailing partial line. */
-function parseChunk(text: string): { rows: string[][]; rest: string } {
+/** Parses a delimited text chunk, returning complete rows plus the trailing partial line. */
+export function parseChunk(text: string, delimiter: string): { rows: string[][]; rest: string } {
   const rows: string[][] = [];
   let field = "";
   let row: string[] = [];
@@ -31,7 +31,7 @@ function parseChunk(text: string): { rows: string[][]; rest: string } {
       i++;
       continue;
     }
-    if (ch === "," || ch === ";" || ch === "\t") {
+    if (ch === delimiter) {
       row.push(field);
       field = "";
       i++;
@@ -57,28 +57,36 @@ function parseChunk(text: string): { rows: string[][]; rest: string } {
   return { rows, rest: text.slice(lastComplete) };
 }
 
+export const DELIMITERS = [",", ";", "\t", "|"] as const;
+
 export function detectDelimiter(headerLine: string): string {
-  const counts: Record<string, number> = {
-    ",": (headerLine.match(/,/g) ?? []).length,
-    ";": (headerLine.match(/;/g) ?? []).length,
-    "\t": (headerLine.match(/\t/g) ?? []).length,
-  };
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]![0];
+  let best = ",";
+  let bestCount = -1;
+  for (const d of DELIMITERS) {
+    const count = headerLine.split(d).length - 1;
+    if (count > bestCount) {
+      bestCount = count;
+      best = d;
+    }
+  }
+  return best;
 }
 
 export interface CsvStreamOptions {
   batchSize?: number;
+  delimiter?: string;
   onHeaders?: (headers: string[]) => void;
   onBatch: (rows: CsvRow[], bytesRead: number) => Promise<void>;
 }
 
-/** Streams a (possibly multi-GB) CSV File from disk, batch by batch, without loading it into memory. */
+/** Streams a (possibly multi-GB) delimited File from disk, batch by batch, without loading it into memory. */
 export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise<number> {
-  const batchSize = opts.batchSize ?? 2000;
+  const batchSize = opts.batchSize ?? 5000;
   const decoder = new TextDecoder("utf-8");
   const reader = file.stream().getReader();
 
   let carry = "";
+  let delimiter = opts.delimiter ?? "";
   let headers: string[] | null = null;
   let batch: CsvRow[] = [];
   let total = 0;
@@ -111,113 +119,34 @@ export async function streamCsvFile(file: File, opts: CsvStreamOptions): Promise
     if (done) break;
     bytesRead += value.byteLength;
     carry += decoder.decode(value, { stream: true });
-    const { rows, rest } = parseChunk(carry);
+    if (!delimiter) {
+      const nl = carry.indexOf("\n");
+      if (nl === -1 && carry.length < 1_000_000) continue;
+      delimiter = detectDelimiter(carry.slice(0, nl === -1 ? carry.length : nl));
+    }
+    const { rows, rest } = parseChunk(carry, delimiter);
     carry = rest;
     await handleRows(rows);
   }
 
   carry += decoder.decode();
   if (carry.trim().length > 0) {
-    const { rows } = parseChunk(carry + "\n");
+    if (!delimiter) delimiter = detectDelimiter(carry.split("\n")[0] ?? "");
+    const { rows } = parseChunk(carry + "\n", delimiter);
     await handleRows(rows);
   }
   await flush();
   return total;
 }
 
-const FIELD_HINTS: Record<string, string[]> = {
-  full_name: ["name", "full name", "fullname", "contact", "الاسم", "اسم"],
-  phone: ["phone", "mobile", "tel", "whatsapp", "number", "هاتف", "جوال", "رقم"],
-  email: ["email", "mail", "e-mail", "ايميل", "بريد"],
-  city: ["city", "town", "area", "region", "مدينة", "منطقة"],
-  company: ["company", "organization", "business", "شركة"],
-  job_title: ["title", "job", "position", "role", "وظيفة"],
-  website: ["website", "url", "site", "domain", "موقع"],
-};
-
-export function autoMap(headers: string[]): Record<string, string> {
-  const map: Record<string, string> = {};
-  for (const [field, hints] of Object.entries(FIELD_HINTS)) {
-    const found = headers.find((h) => {
-      const l = h.toLowerCase();
-      return hints.some((hint) => l === hint || l.includes(hint));
-    });
-    if (found) map[field] = found;
-  }
-  return map;
-}
-
-export const LEAD_FIELDS = [
-  { key: "full_name", label: "الاسم الكامل" },
-  { key: "phone", label: "رقم الهاتف" },
-  { key: "email", label: "البريد الإلكتروني" },
-  { key: "city", label: "المدينة" },
-  { key: "company", label: "الشركة" },
-  { key: "job_title", label: "المسمى الوظيفي" },
-  { key: "website", label: "الموقع الإلكتروني" },
-] as const;
-
-export function normalizePhone(raw: string, countryCode: string): string {
+export function normalizePhone(raw: string, dialCode: string | null): string {
   let v = raw.replace(/[^\d+]/g, "");
   if (!v) return "";
-  const dial: Record<string, string> = {
-    KW: "965",
-    AE: "971",
-    QA: "974",
-    SA: "966",
-    BH: "973",
-    OM: "968",
-    EG: "20",
-    JO: "962",
-    LB: "961",
-    GB: "44",
-    DE: "49",
-    FR: "33",
-    IT: "39",
-    ES: "34",
-    NL: "31",
-    SE: "46",
-    TR: "90",
-    US: "1",
-  };
-  const cc = dial[countryCode];
   if (v.startsWith("00")) v = "+" + v.slice(2);
   if (!v.startsWith("+")) {
     v = v.replace(/^0+/, "");
-    if (cc && !v.startsWith(cc)) v = cc + v;
+    if (dialCode && !v.startsWith(dialCode)) v = dialCode + v;
     v = "+" + v;
   }
   return v;
-}
-
-export function buildLeadRow(
-  row: CsvRow,
-  mapping: Record<string, string>,
-  countryCode: string,
-): Record<string, unknown> | null {
-  const pick = (field: string) => {
-    const col = mapping[field];
-    return col ? (row[col] ?? "").trim() : "";
-  };
-  const phoneRaw = pick("phone");
-  const phone = phoneRaw ? normalizePhone(phoneRaw, countryCode) : "";
-  const email = pick("email").toLowerCase();
-  if (!phone && !email) return null;
-
-  const mapped = new Set(Object.values(mapping));
-  const extra: Record<string, string> = {};
-  for (const [k, v] of Object.entries(row)) {
-    if (!mapped.has(k) && v) extra[k] = v;
-  }
-
-  return {
-    full_name: pick("full_name") || null,
-    phone: phone || null,
-    email: email || null,
-    city: pick("city") || null,
-    company: pick("company") || null,
-    job_title: pick("job_title") || null,
-    website: pick("website") || null,
-    extra,
-  };
 }

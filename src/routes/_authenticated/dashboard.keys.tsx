@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Copy, KeyRound, Loader2, Trash2 } from "lucide-react";
 
@@ -11,6 +11,7 @@ import {
   listApiKeys,
   listCountries,
   listDatasets,
+  listSavedViews,
   setApiKeyActive,
 } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/dashboard/keys")({
   component: KeysPage,
@@ -32,6 +40,7 @@ function KeysPage() {
   const createFn = useServerFn(createApiKey);
   const toggleFn = useServerFn(setApiKeyActive);
   const deleteFn = useServerFn(deleteApiKey);
+  const viewsFn = useServerFn(listSavedViews);
 
   const { data: keys = [] } = useQuery({ queryKey: ["apiKeys"], queryFn: () => keysFn({}) });
   const { data: countries = [] } = useQuery({
@@ -42,6 +51,7 @@ function KeysPage() {
     queryKey: ["datasets"],
     queryFn: () => datasetsFn({}),
   });
+  const { data: views = [] } = useQuery({ queryKey: ["views"], queryFn: () => viewsFn({}) });
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -49,8 +59,22 @@ function KeysPage() {
   const [expiresAt, setExpiresAt] = useState("");
   const [countryCodes, setCountryCodes] = useState<string[]>([]);
   const [datasetIds, setDatasetIds] = useState<string[]>([]);
+  const [scopeMode, setScopeMode] = useState<"any" | "all">("any");
+  const [savedViewId, setSavedViewId] = useState("");
+  const [countryQuery, setCountryQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
+
+  const filteredCountries = useMemo(() => {
+    const q = countryQuery.trim().toLowerCase();
+    if (!q) return countries;
+    return countries.filter(
+      (c) =>
+        c.code.toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q) ||
+        (c.name_ar ?? "").includes(q),
+    );
+  }, [countries, countryQuery]);
 
   const toggleIn = (list: string[], value: string) =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -70,6 +94,8 @@ function KeysPage() {
           expiresAt: expiresAt || null,
           countryCodes,
           datasetIds,
+          scopeMode,
+          savedViewId: savedViewId || null,
         },
       });
       setNewKey(res.key);
@@ -160,14 +186,20 @@ function KeysPage() {
             <p className="mt-1 text-xs text-muted-foreground">
               لا تختر شيئاً = وصول لكل الدول.
             </p>
+            <Input
+              className="mt-2 h-8"
+              value={countryQuery}
+              onChange={(e) => setCountryQuery(e.target.value)}
+              placeholder="ابحث عن دولة…"
+            />
             <div className="mt-3 grid max-h-52 grid-cols-2 gap-2 overflow-y-auto">
-              {countries.map((c) => (
+              {filteredCountries.map((c) => (
                 <label key={c.code} className="flex items-center gap-2 text-sm">
                   <Checkbox
                     checked={countryCodes.includes(c.code)}
                     onCheckedChange={() => setCountryCodes((l) => toggleIn(l, c.code))}
                   />
-                  {c.name}
+                  {c.name_ar ?? c.name}
                 </label>
               ))}
             </div>
@@ -188,6 +220,47 @@ function KeysPage() {
                 </label>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 rounded-xl border border-border p-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>طريقة دمج الصلاحيات</Label>
+            <Select value={scopeMode} onValueChange={(v) => setScopeMode(v as "any" | "all")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">أي منهما (دولة أو مجموعة)</SelectItem>
+                <SelectItem value="all">كلاهما معاً (دولة و مجموعة)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              «أي منهما»: إذا اخترت مجموعات فقط فالمفتاح يرى تلك المجموعات، وإذا اخترت دولاً فقط
+              فيرى كل مجموعات تلك الدول. «كلاهما»: يجب أن يتحقق الشرطان معاً.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>ربط بفلتر محفوظ (اختياري)</Label>
+            <Select
+              value={savedViewId || "__none__"}
+              onValueChange={(v) => setSavedViewId(v === "__none__" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="— بدون —" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— بدون —</SelectItem>
+                {views.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              عند الربط، كل طلب بهذا المفتاح يُطبَّق عليه الفلتر تلقائياً ويُرجع أعمدة الفلتر فقط.
+            </p>
           </div>
         </div>
 

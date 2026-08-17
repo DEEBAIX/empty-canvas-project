@@ -91,6 +91,27 @@ while (true) {
       />
 
       <div className="rounded-2xl border border-border bg-card p-5 text-sm">
+        <h3 className="font-bold">الفلترة من طرف المنصة الأخرى (Data Filter عبر API)</h3>
+        <p className="mt-2 text-muted-foreground">
+          كل عمود في ملفاتك قابل للفلترة — الأعمدة الأساسية والأعمدة الخاصة بالملف على حد سواء.
+        </p>
+        <pre className="mt-3 overflow-x-auto rounded-lg bg-background p-3 text-xs" dir="ltr">
+{`GET /api/public/v1/schema                 # اكتشاف المجموعات والأعمدة المتاحة للمفتاح
+GET /api/public/v1/leads?filter[city][eq]=Kuwait
+GET /api/public/v1/leads?filter[phone][notempty]=1&fields=full_name,phone
+GET /api/public/v1/leads?filter[facebook_id][contains]=100
+GET /api/public/v1/leads?filter[email][in]=a@x.com,b@x.com
+
+# العمليات المتاحة:
+# eq | contains | starts | ends | in | empty | notempty | gte | lte`}
+        </pre>
+        <p className="mt-3 text-muted-foreground">
+          <b>fields</b> تحدد الأعمدة المُعادة. وإذا رُبط المفتاح بفلتر محفوظ (View) من صفحة
+          «فلترة البيانات» فسيُطبَّق تلقائياً على كل طلب.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 text-sm">
         <h3 className="font-bold">أكواد الأخطاء</h3>
         <ul className="mt-3 space-y-1 text-muted-foreground">
           <li>401 — مفتاح مفقود أو غير صحيح</li>
@@ -99,6 +120,7 @@ while (true) {
           <li>500 — خطأ داخلي</li>
         </ul>
       </div>
+
     </div>
   );
 }
