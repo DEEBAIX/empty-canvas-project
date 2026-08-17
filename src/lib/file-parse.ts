@@ -19,7 +19,10 @@ export function fileKind(name: string): FileKind {
 export interface FilePreview {
   headers: string[];
   rows: CsvRow[];
+  /** True when the file had no header row and positional template names were used. */
+  headerless?: boolean;
 }
+
 
 function objectsToPreview(list: Record<string, unknown>[]): FilePreview {
   const headers: string[] = [];
