@@ -47,7 +47,7 @@ fi
 say "Installing host requirements"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y ca-certificates curl git nginx certbot python3-certbot-nginx openssl jq file
+apt-get install -y ca-certificates curl git nginx certbot python3-certbot-nginx openssl jq file rsync
 if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'Number(process.versions.node.split(`.`)[0])')" -lt 20 ]; then
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
   apt-get install -y nodejs
@@ -220,7 +220,7 @@ SQL
     -e PGPASSWORD="$POSTGRES_PASSWORD" \
     -v "$BACKUP_FILE:/backup/datahub.backup:ro" \
     postgres:18 pg_restore -h db -U postgres -d "$RESTORE_DB" \
-      --no-owner --no-privileges --exit-on-error --verbose /backup/datahub.backup
+      --no-owner --exit-on-error --verbose /backup/datahub.backup
 
   COUNTS="$(compose exec -T db psql -U postgres -d "$RESTORE_DB" -At -F, -v ON_ERROR_STOP=1 -c \
     "SELECT (SELECT count(*) FROM auth.users),(SELECT count(*) FROM public.user_roles),(SELECT count(*) FROM public.countries),(SELECT count(*) FROM public.datasets),(SELECT count(*) FROM public.leads);")"
